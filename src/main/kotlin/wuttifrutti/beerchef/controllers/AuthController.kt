@@ -1,6 +1,5 @@
 package wuttifrutti.beerchef.controllers
 
-import org.litote.kmongo.div
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
 import org.litote.kmongo.save
@@ -22,7 +21,6 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/auth")
 class AuthController {
-
 
     data class RequestUser(val username: String, val email: String, val password: String)
 
@@ -55,7 +53,7 @@ class AuthController {
         val requested = UserRepository.findOne(User::email eq login.email)
         if (requested != null && PasswordUtils.isExpectedPassword(login.password, requested.salt, requested.hash)) {
             val token = UUID.randomUUID()
-            requested.tokens.add(
+            requested.tokens.plus(
                 Token(
                     token = token,
                     messageToken = "",
@@ -71,16 +69,11 @@ class AuthController {
         throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
     }
 
-    data class Validation(val token: UUID)
+
 
     @PostMapping("/validate")
-    fun validate(@RequestBody validation: Validation): User {
-        return UserRepository.findOne(
-            User::tokens / Token::token eq validation.token
-        ) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    fun validate(request: HttpServletRequest): User = getUser(request)
 
-
-    }
 
     @DeleteMapping("/login")
     fun logout(response: HttpServletResponse, request: HttpServletRequest) {

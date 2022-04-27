@@ -14,7 +14,7 @@ data class User(
     val hash: ByteArray,
     val salt: ByteArray,
     val total: Number = 0,
-    var tokens: ArrayList<Token> = ArrayList(),
+    var tokens: Set<Token> = emptySet(),
     @BsonId val key: Id<User> = newId(),
 ) {
 
