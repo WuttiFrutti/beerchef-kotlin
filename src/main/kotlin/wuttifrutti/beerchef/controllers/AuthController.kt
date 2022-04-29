@@ -11,7 +11,7 @@ import wuttifrutti.beerchef.model.SafeUser
 import wuttifrutti.beerchef.model.Token
 import wuttifrutti.beerchef.model.User
 import wuttifrutti.beerchef.repository.UserRepository
-import wuttifrutti.beerchef.service.getUser
+import wuttifrutti.beerchef.service.AuthService
 import java.time.LocalDateTime
 import java.util.*
 import javax.servlet.http.Cookie
@@ -45,7 +45,7 @@ class AuthController {
             : Map<String, Any> {
 
         try {
-            getUser(request)
+            AuthService.getUser(request)
             throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
         } catch (_: ResponseStatusException) {
         }
@@ -72,12 +72,12 @@ class AuthController {
 
 
     @PostMapping("/validate")
-    fun validate(request: HttpServletRequest): User = getUser(request)
+    fun validate(request: HttpServletRequest): User = AuthService.getUser(request)
 
 
     @DeleteMapping("/login")
     fun logout(response: HttpServletResponse, request: HttpServletRequest) {
-        getUser(request)
+        AuthService.getUser(request)
 
         response.addCookie(Cookie("token", null));
     }

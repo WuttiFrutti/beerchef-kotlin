@@ -11,7 +11,8 @@ import wuttifrutti.beerchef.repository.BeerListRepository
 import wuttifrutti.beerchef.repository.DrinkRepository
 import wuttifrutti.beerchef.repository.EndedBeerListRepository
 import wuttifrutti.beerchef.repository.UserRepository
-import wuttifrutti.beerchef.service.getUser
+import wuttifrutti.beerchef.service.AuthService
+import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -19,10 +20,11 @@ import javax.servlet.http.HttpServletRequest
 class ListController {
 
     @GetMapping("/all")
-    fun lists(request: HttpServletRequest) : Map<String, Any> {
-        val user = getUser(request)
+    fun lists(request: HttpServletRequest): Map<String, Any> {
+        val user = AuthService.getUser(request)
 
-        val lists = BeerListRepository.find(or(BeerList::owner eq user.key, BeerList::users / ListUser::user eq user.key))
+        val lists =
+            BeerListRepository.find(or(BeerList::owner eq user.key, BeerList::users / ListUser::user eq user.key))
         val userDrinks = DrinkRepository.find(User::key eq user.key)
 
         val userIds = lists.map { it.users.map { listUser -> listUser.user } }.flatten()
@@ -38,17 +40,23 @@ class ListController {
 
     @GetMapping("/ended")
     fun ended(request: HttpServletRequest): List<BeerList> {
-        val user = getUser(request)
+        val user = AuthService.getUser(request)
 
-        return EndedBeerListRepository.find(or(
-            BeerList::owner eq user.key,
-            BeerList::users / User::key eq user.key
-        )).toList()
+        return EndedBeerListRepository.find(
+            or(
+                BeerList::owner eq user.key,
+                BeerList::users / User::key eq user.key
+            )
+        ).toList()
     }
 
     @GetMapping("{listId}/user/{userId}")
-    fun listUserDrinks(@PathVariable listId: Id<BeerList>, @PathVariable userId: Id<User>, request: HttpServletRequest): List<Drink> {
-        val user = getUser(request)
+    fun listUserDrinks(
+        @PathVariable listId: Id<BeerList>,
+        @PathVariable userId: Id<User>,
+        request: HttpServletRequest
+    ): List<Drink> {
+        val user = AuthService.getUser(request)
 
         // TODO: Make safe for specific user
 
@@ -57,20 +65,20 @@ class ListController {
 
     @GetMapping("{listId}/drinks")
     fun listDrinks(@PathVariable listId: Id<BeerList>, request: HttpServletRequest): List<Drink> {
-        val user = getUser(request)
+        val user = AuthService.getUser(request)
 
         // TODO: Make safe for specific user
 
         return DrinkRepository.find(Drink::list eq listId).toList()
     }
 
-    data class RequestList(val name: String, val price: Number, val join: Boolean, val users: List<String>)
+    data class RequestList(val name: String, val price: Int, val join: Boolean, val users: List<String>)
 
     @PostMapping
-    fun createList(@RequestBody requested:RequestList, request: HttpServletRequest): Map<String, Any> {
-        val user = getUser(request)
+    fun createList(@RequestBody requested: RequestList, request: HttpServletRequest): Map<String, Any> {
+        val user = AuthService.getUser(request)
 
-        val usersToAdd = if(requested.users.isNotEmpty()){
+        val usersToAdd = if (requested.users.isNotEmpty()) {
             UserRepository.find(User::email `in` requested.users)
         } else {
             emptyList<User>()
@@ -78,7 +86,7 @@ class ListController {
 
         val notFoundUsers = requested.users.filter { !usersToAdd.map { user -> user.email }.contains(it) }
 
-        if(notFoundUsers.isNotEmpty()){
+        if (notFoundUsers.isNotEmpty()) {
             return mapOf(
                 "emails" to notFoundUsers
             )
@@ -88,7 +96,7 @@ class ListController {
             name = requested.name,
             price = requested.price,
             owner = user.key,
-            users = if(requested.join) setOf(ListUser(user = user.key)) else emptySet()
+            users = if (requested.join) setOf(ListUser(user = user.key)) else emptySet()
         )
 
         BeerListRepository.save(list)
@@ -98,5 +106,20 @@ class ListController {
 
         return emptyMap()
     }
+
+    data class AddUserToListRequest(val shareId: UUID)
+
+    @PostMapping("/user")
+    fun addUserToList(@RequestBody addToListRequest: AddUserToListRequest, request: HttpServletRequest): BeerList? {
+        val user = AuthService.getUser(request)
+
+        return BeerListRepository.findOneAndUpdate(
+            BeerList::shareId eq addToListRequest.shareId,
+            push(BeerList::users, ListUser(user.key))
+        )
+    }
+
+
+
 
 }
