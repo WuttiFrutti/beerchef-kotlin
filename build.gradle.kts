@@ -32,6 +32,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.kodein.di:kodein-di-jx-inject-jvm:5.2.0")
+	implementation("org.kodein.di:kodein-di-generic-jvm:6.4.1")
 }
 
 dependencyManagement {
