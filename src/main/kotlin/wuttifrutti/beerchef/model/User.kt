@@ -4,7 +4,7 @@ import org.bson.codecs.pojo.annotations.BsonId
 import org.litote.kmongo.Id
 import org.litote.kmongo.newId
 
-data class SafeUser(val username: String, val email: String, val total: Int);
+data class SafeUser(val username: String, val email: String, val total: Int, val key: Id<User>);
 
 
 
@@ -20,7 +20,7 @@ data class User(
 
 
     fun toSafe(): SafeUser {
-        return SafeUser(this.username, this.email, this.total);
+        return SafeUser(this.username, this.email, this.total, this.key);
     }
 
 
