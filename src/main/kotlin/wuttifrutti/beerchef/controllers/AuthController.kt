@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*
 import wuttifrutti.beerchef.exceptions.NotAllowed
 import wuttifrutti.beerchef.model.SafeUser
 import wuttifrutti.beerchef.service.AuthService
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -37,7 +38,7 @@ class AuthController(private val authService: AuthService) {
 
         val token = authService.login(login.email, login.password)
 
-//        response.addCookie(Cookie("token", token).also { it.maxAge = 31536000; it.path = "/" })
+        response.addCookie(Cookie("token", token).also { it.maxAge = 31536000; it.path = "/" })
 
         return mapOf("token" to token)
     }
@@ -50,5 +51,7 @@ class AuthController(private val authService: AuthService) {
     @DeleteMapping("/login")
     fun logout(response: HttpServletResponse, request: HttpServletRequest) {
         authService.logout(request)
+
+        response.addCookie(Cookie("token", null).also { it.maxAge = 0 });
     }
 }

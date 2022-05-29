@@ -21,7 +21,7 @@ class BeerchefApplication {
 	fun corsConfigurer(): WebMvcConfigurer {
 		return object : WebMvcConfigurer {
 			override fun addCorsMappings(registry: CorsRegistry) {
-				registry.addMapping("/**").allowedOrigins("http://192.168.178.108:3000").allowCredentials(true)
+				registry.addMapping("/**").allowedOrigins("http://192.168.178.108:19006").allowCredentials(true).allowedMethods("GET", "POST","PUT", "DELETE", "OPTIONS","HEAD")
 			}
 		}
 	}
