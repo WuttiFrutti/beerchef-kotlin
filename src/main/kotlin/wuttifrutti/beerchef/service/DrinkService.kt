@@ -50,7 +50,7 @@ class DrinkService(
 
         val listUser = list.users.find { it.user == onUser.key } ?: throw NotFound("The user in the list")
         listUser.total += amount
-        listUser.drinks.plus(drink.key)
+        listUser.drinks = listUser.drinks.plus(drink.key)
 
         onUser.total += amount
         list.total += amount

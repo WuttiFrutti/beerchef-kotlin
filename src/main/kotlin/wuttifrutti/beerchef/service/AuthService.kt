@@ -21,13 +21,14 @@ import javax.servlet.http.HttpServletRequest
 class AuthService(private val userRepository: MongoCollection<User>) {
 
     fun getUser(request: HttpServletRequest): User {
+
         val cookie = WebUtils.getCookie(
-                request,
-                "token"
-            ) ?: throw NotAllowed("Performing this action without a token")
+            request,
+            "token"
+        ) ?: throw NotAllowed("Performing this action without a token")
 
         return userRepository.findOne(
-            User::tokens / Token::token eq UUID.fromString(cookie.value)
+            User::tokens / Token::token eq cookie.value
         ) ?: throw NotAllowed("Performing this action without logging in")
     }
 
@@ -45,11 +46,11 @@ class AuthService(private val userRepository: MongoCollection<User>) {
         return inserted
     }
 
-    fun login(email: String, password: String): UUID {
+    fun login(email: String, password: String): String {
         val requested = userRepository.findOne(User::email eq email)
         if (requested != null && PasswordUtils.isExpectedPassword(password, requested.salt, requested.hash)) {
-            val token = UUID.randomUUID()
-            requested.tokens.plus(
+            val token = UUID.randomUUID().toString()
+            requested.tokens = requested.tokens.plus(
                 Token(
                     token = token,
                     messageToken = "",
@@ -63,6 +64,19 @@ class AuthService(private val userRepository: MongoCollection<User>) {
         }
 
         throw NotAllowed("Logging in with incorrect credentials", ExceptionTypes.WRONG_CREDENTIALS)
+    }
+
+    fun logout(request: HttpServletRequest) {
+        val user = getUser(request)
+
+        val token = WebUtils.getCookie(
+            request,
+            "token"
+        ) ?: throw NotAllowed("Performing this action without a token")
+
+        user.tokens = user.tokens.filter { it.token != token.value }.toSet()
+
+        userRepository.save(user)
     }
 
 

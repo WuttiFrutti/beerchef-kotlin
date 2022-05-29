@@ -7,6 +7,7 @@ import com.mongodb.client.model.IndexOptions
 import org.bson.UuidRepresentation
 import org.litote.kmongo.KMongo
 import org.litote.kmongo.getCollection
+import org.litote.kmongo.id.jackson.IdJacksonModule
 import org.litote.kmongo.index
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -23,7 +24,13 @@ class DatabaseBeans{
     fun database(): MongoDatabase {
         val client = KMongo.createClient(MongoClientSettings.builder().uuidRepresentation(UuidRepresentation.STANDARD).build())
 
+
         return client.getDatabase("beerchef-kotlin")
+    }
+
+    @Bean
+    fun idJacksonModule(): IdJacksonModule {
+        return IdJacksonModule()
     }
 
     @Bean

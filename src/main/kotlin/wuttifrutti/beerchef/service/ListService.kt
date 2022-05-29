@@ -4,11 +4,11 @@ import com.mongodb.client.MongoCollection
 import org.litote.kmongo.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import wuttifrutti.beerchef.helpers.asMap
 import wuttifrutti.beerchef.model.BeerList
 import wuttifrutti.beerchef.model.Drink
 import wuttifrutti.beerchef.model.ListUser
 import wuttifrutti.beerchef.model.User
-import java.util.*
 
 @Service
 class ListService(
@@ -30,9 +30,9 @@ class ListService(
         val users = userRepository.find(User::key `in` userIds)
 
         return mapOf(
-            "lists" to lists,
-            "users" to users,
-            "userDrinks" to userDrinks
+            "lists" to lists.toList(),
+            "users" to users.map { it.toSafe() }.toList(),
+            "userDrinks" to userDrinks.toList()
         )
     }
 
@@ -53,7 +53,7 @@ class ListService(
         return drinkRepository.find(Drink::list eq listId).toList()
     }
 
-    fun createList(users: List<String>, name: String, price: Int, join: Boolean, user: User): Map<String, Any> {
+    fun createList(users: Set<String>, name: String, price: Int, join: Boolean, user: User): Map<String, Any?> {
         val usersToAdd = if (users.isNotEmpty()) {
             userRepository.find(User::email `in` users)
         } else {
@@ -77,10 +77,10 @@ class ListService(
 
         beerListRepository.save(list)
 
-        return emptyMap()
+        return list.asMap()
     }
 
-    fun addUserToList(shareId: UUID, user: Id<User>): BeerList? {
+    fun addUserToList(shareId: String, user: Id<User>): BeerList? {
         return beerListRepository.findOneAndUpdate(
             BeerList::shareId eq shareId,
             push(BeerList::users, ListUser(user))

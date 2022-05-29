@@ -8,7 +8,6 @@ import wuttifrutti.beerchef.model.Drink
 import wuttifrutti.beerchef.model.User
 import wuttifrutti.beerchef.service.AuthService
 import wuttifrutti.beerchef.service.ListService
-import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -37,7 +36,7 @@ class ListController(private val authService: AuthService, private val listServi
         @PathVariable userId: Id<User>,
         request: HttpServletRequest
     ): List<Drink> {
-        val user = authService.getUser(request)
+//        val user = authService.getUser(request)
 
         // TODO: Make safe for specific user
 
@@ -53,10 +52,10 @@ class ListController(private val authService: AuthService, private val listServi
         return listService.listDrinks(listId)
     }
 
-    data class RequestList(val name: String, val price: Int, val join: Boolean, val users: List<String>)
+    data class RequestList(val name: String, val price: Int, val join: Boolean, val users: Set<String>)
 
     @PostMapping
-    fun createList(@RequestBody requested: RequestList, request: HttpServletRequest): Map<String, Any> {
+    fun createList(@RequestBody requested: RequestList, request: HttpServletRequest): Map<String, Any?> {
         val user = authService.getUser(request)
 
         // TODO: send join requests
@@ -64,7 +63,7 @@ class ListController(private val authService: AuthService, private val listServi
         return listService.createList(requested.users, requested.name, requested.price, requested.join, user)
     }
 
-    data class AddUserToListRequest(val shareId: UUID)
+    data class AddUserToListRequest(val shareId: String)
 
     @PostMapping("/user")
     fun addUserToList(@RequestBody addToListRequest: AddUserToListRequest, request: HttpServletRequest): BeerList? {

@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.kodein.di:kodein-di-jx-inject-jvm:5.2.0")
 	implementation("org.kodein.di:kodein-di-generic-jvm:6.4.1")
+	implementation("org.litote.kmongo:kmongo-id-jackson:4.6.0")
 }
 
 dependencyManagement {

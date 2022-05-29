@@ -10,7 +10,7 @@ data class BeerList(
     val price: Int,
     val owner: Id<User>,
     val users: Set<ListUser> = emptySet(),
-    val shareId: UUID = UUID.randomUUID(),
+    val shareId: String = UUID.randomUUID().toString(),
     var total: Int = 0,
     @BsonId val key: Id<BeerList> = newId()
 )

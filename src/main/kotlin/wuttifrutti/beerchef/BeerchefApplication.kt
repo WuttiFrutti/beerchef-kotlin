@@ -1,25 +1,31 @@
 package wuttifrutti.beerchef
 
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 
 @SpringBootApplication
-class BeerchefApplication
+class BeerchefApplication {
 
-fun main(args: Array<String>) {
-	runApplication<BeerchefApplication>(*args)
-}
-
-
-@Bean
-fun corsConfigurer(): WebMvcConfigurer {
-	return object : WebMvcConfigurer {
-		override fun addCorsMappings(registry: CorsRegistry) {
-			registry.addMapping("/**")
+	companion object {
+		@JvmStatic
+		fun main(args: Array<String>) {
+			SpringApplication.run(BeerchefApplication::class.java, *args)
 		}
 	}
+
+	@Bean
+	fun corsConfigurer(): WebMvcConfigurer {
+		return object : WebMvcConfigurer {
+			override fun addCorsMappings(registry: CorsRegistry) {
+				registry.addMapping("/**").allowedOrigins("http://192.168.178.108:3000").allowCredentials(true)
+			}
+		}
+	}
+
 }
+
+
